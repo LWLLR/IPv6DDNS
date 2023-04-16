@@ -14,14 +14,18 @@ func Watch(ctx context.Context, updater IPV6DDNS) error {
 	if updater == nil {
 		return fmt.Errorf("updater is nil")
 	}
-	t := time.NewTicker(time.Second * time.Duration(Conf.Interval))
+	t := time.NewTicker(time.Second * time.Duration(Conf.GetInterval()))
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		case <-t.C:
-			updater.Update(ctx, GetIPV6())
+			ip, err := GetIPV6()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			updater.Update(ctx, ip)
 		}
 	}
-	return nil
 }
