@@ -27,7 +27,26 @@ func NewTencentCloudUpdater() (*TencentCloudUpdater, error) {
 }
 
 func (t *TencentCloudUpdater) Update(ctx context.Context, ipv6 string) error {
-	// TODO: implement
+	subDomain := Conf.GetTencentConfig().GetSubDomain()
+	if subDomain == "" {
+		return fmt.Errorf("sub_domain is empty")
+	}
+	descRsp, err := t.DescribeRecordList(ctx)
+	if err != nil {
+		return err
+	}
+	if descRsp == nil || descRsp.Response == nil {
+		return nil
+	}
+	record := t.GetRecordBySubdomain(subDomain, descRsp.Response.RecordList)
+	if record == nil || record.Value == nil {
+		return nil
+	}
+	if *record.Value != ipv6 {
+		if err = t.ModifyDynamicDNS(ctx, record, ipv6); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -43,6 +62,18 @@ func (t *TencentCloudUpdater) DescribeRecordList(ctx context.Context) (response 
 	return t.client.DescribeRecordListWithContext(ctx, req)
 }
 
+func (t *TencentCloudUpdater) GetRecordBySubdomain(subDomain string, list []*dnspod.RecordListItem) *dnspod.RecordListItem {
+	for _, item := range list {
+		if item == nil || item.Name == nil {
+			continue
+		}
+		if *item.Name == subDomain {
+			return item
+		}
+	}
+	return nil
+}
+
 func (t *TencentCloudUpdater) ModifyDynamicDNS(ctx context.Context, record *dnspod.RecordListItem, ipv6 string) error {
 	req := dnspod.NewModifyDynamicDNSRequest()
 	req.Domain = common.StringPtr(Conf.GetTencentConfig().GetDomain())
@@ -50,5 +81,10 @@ func (t *TencentCloudUpdater) ModifyDynamicDNS(ctx context.Context, record *dnsp
 	req.RecordId = record.RecordId
 	req.RecordLine = record.Line
 	req.Value = common.StringPtr(ipv6)
+	rsp, err := t.client.ModifyDynamicDNSWithContext(ctx, req)
+	if err != nil {
+		fmt.Println("ModifyDynamicDNS requestID:", rsp.Response.RequestId)
+		return err
+	}
 	return nil
 }

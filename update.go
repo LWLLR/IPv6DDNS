@@ -25,7 +25,9 @@ func Watch(ctx context.Context, updater IPV6DDNS) error {
 				fmt.Println(err)
 				continue
 			}
-			updater.Update(ctx, ip)
+			if err = updater.Update(ctx, ip); err != nil {
+				fmt.Println("update dns err:", err)
+			}
 		}
 	}
 }
