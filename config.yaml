@@ -1,0 +1,7 @@
+interval: 3
+tencent_config:
+  domain: your_domain
+  sub_domain: your_sub_domain #主机记录 不传默认@
+  record_type: AAAA
+  secret_id: your_secret_id
+  secret_key: your_secret_key
