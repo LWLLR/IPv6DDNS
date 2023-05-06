@@ -1,4 +1,5 @@
 interval: 3
+socks_5_config: "socks5://127.0.0.1:1080"
 tencent_config:
   domain: your_domain
   sub_domain: your_sub_domain #主机记录 不传默认@

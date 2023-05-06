@@ -6,6 +6,9 @@ import (
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	dnspod "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod/v20210323"
+	"golang.org/x/net/proxy"
+	"net/http"
+	"net/url"
 )
 
 type TencentCloudUpdater struct {
@@ -13,15 +16,35 @@ type TencentCloudUpdater struct {
 }
 
 func NewTencentCloudUpdater() (*TencentCloudUpdater, error) {
-	client, err := dnspod.NewClient(
+	c, err := dnspod.NewClient(
 		common.NewCredential(Conf.GetTencentConfig().GetSecretId(), Conf.GetTencentConfig().GetSecretKey()),
 		"",
 		profile.NewClientProfile())
 	if err != nil {
 		return nil, err
 	}
+
+	if Conf.GetSocks5Config() != "" {
+		proxyURL, err := url.Parse(Conf.GetSocks5Config())
+		if err != nil {
+			return nil, err
+		}
+		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
+		if err != nil {
+			return nil, err
+		}
+		dialerCtx, ok := dialer.(proxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("implement ContextDialer fail")
+		}
+		tr := &http.Transport{
+			DialContext: dialerCtx.DialContext,
+		}
+		c.WithHttpTransport(tr)
+		fmt.Printf("use proxy:%s\n", Conf.GetSocks5Config())
+	}
 	return &TencentCloudUpdater{
-		client: client,
+		client: c,
 	}, nil
 }
 

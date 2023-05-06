@@ -12,6 +12,7 @@ var Conf *Config
 type Config struct {
 	Interval      int            `yaml:"interval"`
 	TencentConfig *TencentConfig `yaml:"tencent_config"`
+	Socks5Config  string         `yaml:"socks_5_config"`
 }
 
 type TencentConfig struct {
@@ -46,6 +47,13 @@ func (c *Config) GetTencentConfig() *TencentConfig {
 		return nil
 	}
 	return c.TencentConfig
+}
+
+func (c *Config) GetSocks5Config() string {
+	if c == nil {
+		return ""
+	}
+	return c.Socks5Config
 }
 
 func (t *TencentConfig) GetDomain() string {
