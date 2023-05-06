@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"flag"
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -23,9 +25,14 @@ type TencentConfig struct {
 	SubDomain  string `yaml:"sub_domain"`
 }
 
+var configPath string
+
 func init() {
+	flag.StringVar(&configPath, "c", "./config.yaml", "配置地址")
+	flag.Parse()
 	Conf = &Config{}
-	f, err := os.ReadFile(ConfigPath)
+	fmt.Println("configPath", configPath)
+	f, err := os.ReadFile(configPath)
 	if err != nil {
 		panic(err)
 	}
