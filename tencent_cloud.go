@@ -42,7 +42,7 @@ func (t *TencentCloudUpdater) Update(ctx context.Context, ipv6 string) error {
 		return nil
 	}
 	if *record.Value != ipv6 {
-		fmt.Printf("ip一致，旧ip:%s;新ip:%s\n", *record.Value, ipv6)
+		fmt.Printf("ip不一致，旧ip:%s;新ip:%s\n", *record.Value, ipv6)
 		if err = t.ModifyDynamicDNS(ctx, record, ipv6); err != nil {
 			return err
 		}
