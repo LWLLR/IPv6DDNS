@@ -25,7 +25,7 @@ type TencentConfig struct {
 
 func init() {
 	Conf = &Config{}
-	f, err := os.ReadFile("config.yaml")
+	f, err := os.ReadFile(ConfigPath)
 	if err != nil {
 		panic(err)
 	}
